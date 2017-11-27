@@ -65,6 +65,8 @@ newoption {
 p.api.addAllowed("flags", "FBUnityBuild")
 p.api.addAllowed("flags", "FBUnityBuildDisabled")
 
+p.api.addAllowed("debugformat", "ProgramDatabase")
+
 ---
 -- Define the FASTBuild export action.
 ---

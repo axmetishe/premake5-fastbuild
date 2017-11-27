@@ -12,12 +12,12 @@
     p.fastbuild = p.modules.fastbuild
 
     -- load actions.
-    require "fastbuild_action"
-    require "fastbuild_utils"
-    require "fastbuild_dependency_resolver"
-    require "fastbuild_platforms"
-    require "fastbuild_toolset"
-    require "fastbuild_solution"
-    require "fastbuild_project"
-    require "toolsets/fastbuild_msc"
-    require "toolsets/fastbuild_clang"
+    require "cfg_premake/fastbuild/fastbuild_action"
+    require "cfg_premake/fastbuild/fastbuild_utils"
+    require "cfg_premake/fastbuild/fastbuild_dependency_resolver"
+    require "cfg_premake/fastbuild/fastbuild_platforms"
+    require "cfg_premake/fastbuild/fastbuild_toolset"
+    require "cfg_premake/fastbuild/fastbuild_solution"
+    require "cfg_premake/fastbuild/fastbuild_project"
+    require "cfg_premake/fastbuild/toolsets/fastbuild_msc"
+    require "cfg_premake/fastbuild/toolsets/fastbuild_clang"

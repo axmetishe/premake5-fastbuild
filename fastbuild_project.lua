@@ -70,7 +70,7 @@
     end
 
     function m.generate(prj)
-        prj.unity_builds = _OPTIONS['fb-unity-builds'] ~= nil and prj.flags.FBUnityBuild
+        prj.unity_builds = _OPTIONS['fb-unity-builds'] ~= nil and (prj.flags.FBUnityBuild or prj.flags.UnityBuildEnable)
 
         local has = hasToolchain(prj)
         if has then

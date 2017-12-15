@@ -103,6 +103,10 @@
             m.treatWarningAsError,
             m.debugInformationFormat,
             m.optimization,
+            m.intrinsicFunctions,
+            m.minimalRebuild,
+            m.openMPSupport,
+            m.enableFunctionLevelLinking,
             m.runtimeLibrary,
             m.clCompilePreprocessorDefinitions,
             m.clCompileAdditionalIncludeDirectories,
@@ -124,6 +128,8 @@
                 m.linkIncremental,
                 m.additionalDependencies,
                 m.additionalLibraryDirectories,
+                m.optimizeReferences,
+                m.enableCOMDATFolding,
                 m.delayLoadDlls,
                 m.entryPointSymbol,
                 m.additionalLinkOptions,
@@ -304,6 +310,81 @@
         local canLinkIncremental = config.canLinkIncremental(cfg)
         if cfg.kind ~= p.STATICLIB and canLinkIncremental then
             m.element("/INCREMENTAL", "Incremental linking: %s", tostring(canLinkIncremental))
+        end
+    end
+
+    function m.optimizeReferences(cfg)
+        if config.isOptimizedBuild(cfg)  then
+            if cfg.optimizereferences ~= "No" then
+                m.element("/OPT:REF", "Optimize References: %s", "Yes")
+
+            else
+                m.element("/OPT:NOREF", "Optimize References: %s", "No")
+
+            end
+
+        elseif cfg.optimizereferences == "Yes" then
+            m.element("/OPT:REF", "Optimize References: %s", "Yes")
+
+        else
+            m.element("/OPT:NOREF", "Optimize References: %s", "No")
+
+        end
+    end
+
+    function m.enableCOMDATFolding(cfg)
+        if config.isOptimizedBuild(cfg)  then
+            if cfg.comdatfolding ~= "No" then
+                m.element("/OPT:ICF", "Optimize References: %s", "Yes")
+
+            else
+                m.element("/OPT:NOICF", "Optimize References: %s", "No")
+
+            end
+
+        elseif cfg.comdatfolding == "Yes" then
+            m.element("/OPT:ICF", "Optimize References: %s", "Yes")
+
+        else
+            m.element("/OPT:NOICF", "Optimize References: %s", "No")
+
+        end
+    end
+
+    function m.intrinsicFunctions(cfg)
+        if cfg.intrinsicfunctions ~= nil then
+            if cfg.intrinsicfunctions then
+                m.element("/Oi", "Intrinsics functions: %s", "true")
+
+            end
+
+        elseif config.isOptimizedBuild(cfg) then
+            m.element("/Oi", "Intrinsics functions: %s", "true")
+
+        end
+    end
+
+    function m.openMPSupport(cfg)
+        local map = { Yes = "/openmp", No = "/openmp-" }
+        if map[cfg.openmp] then
+            m.element(map[cfg.openmp], "Open MP Support: %s", cfg.openmp)
+        end
+    end
+
+    function m.enableFunctionLevelLinking(cfg)
+        local map = { Yes = "/Gy", No = "/Gy-" }
+        if map[cfg.functionlevellinking] then
+            m.element(map[cfg.functionlevellinking], "Function Level Linking: %s", cfg.functionlevellinking)
+        end
+    end
+
+    function m.minimalRebuild(cfg)
+        if config.isOptimizedBuild(cfg) or
+           cfg.flags.NoMinimalRebuild or
+           cfg.flags.MultiProcessorCompile or
+           cfg.debugformat == p.C7
+        then
+            m.element("/Gm-", "Minimal rebuild: Disabled")
         end
     end
 
@@ -1523,6 +1604,7 @@
     end
 
     function m.projectDependencies(prj, cfg)
+        local use_dep_inputs = (cfg.usedependencyinputs and cfg.usedependencyinputs:lower() == "yes")
         local refs = project.getdependencies(prj, 'linkOnly')
         local libs = { }
         if #refs > 0 then
@@ -1591,9 +1673,12 @@
                 if ref.kind == p.STATICLIB then
 
                     table.insert(libs, (".libs_%s_%s"):format(ref.name, fastbuild.projectPlatform(cfg)))
+
                 end
+
             end
         end
+
         return libs
     end
 

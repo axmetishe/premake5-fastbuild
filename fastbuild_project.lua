@@ -1545,34 +1545,37 @@
         return libs
     end
 
+    function m.projectLinkDependencyInputs(prj, cfg)
+        local is_dll = cfg.kind == p.SHAREDLIB
+        return cfg.usedependencyinputs and cfg.usedependencyinputs:lower() == "yes" and config.canLinkIncremental(cfg) and is_dll
+    end
 
     function m.projectDependencyTargets(prj, cfg)
-
-        local use_dep_inputs = config.canLinkIncremental(cfg) and (cfg.usedependencyinputs and cfg.usedependencyinputs:lower() == "yes")
+        local use_dep_inputs = m.projectLinkDependencyInputs(prj, cfg)
         local refs = project.getdependencies(prj, 'linkOnly')
         local libs = { }
         if #refs > 0 then
             for _, ref in ipairs(refs) do
 
-                local linktarget = project.getconfig(ref, cfg.buildcfg, cfg.platform or "Win32").buildtarget
+                local ref_cfg = project.getconfig(ref, cfg.buildcfg, cfg.platform or "Win32")
+                if ref_cfg then
 
-                if use_dep_inputs and ref.kind == p.SHAREDLIB then
+                    local linktarget = ref_cfg.buildtarget
 
-                    table.insert(libs, fastbuild.projectTargetname(ref, cfg)) -- path.translate(linktarget.directory .. "/") .. linktarget.name)
+                    if use_dep_inputs and ref.kind == p.SHAREDLIB then
 
-                elseif not use_dep_inputs and (ref.kind ~= p.CONSOLEAPP and ref.kind ~= p.WINDOWEDAPP) then
+                        table.insert(libs, fastbuild.projectTargetname(ref, cfg)) -- path.translate(linktarget.directory .. "/") .. linktarget.name)
 
-                    table.insert(libs, fastbuild.projectTargetname(ref, cfg)) -- path.translate(linktarget.directory .. "/") .. linktarget.name)
+                    elseif not use_dep_inputs and (ref.kind ~= p.CONSOLEAPP and ref.kind ~= p.WINDOWEDAPP) then
+
+                        table.insert(libs, fastbuild.projectTargetname(ref, cfg)) -- path.translate(linktarget.directory .. "/") .. linktarget.name)
+
+                    end
 
                 end
-
             end
         end
         return libs
-    end
-
-    function m.projectLinkDependencyInputs(prj, cfg)
-        return cfg.usedependencyinputs and cfg.usedependencyinputs:lower() == "yes" and config.canLinkIncremental(cfg)
     end
 
     function m.projectDependencyInputs(prj, cfg)
